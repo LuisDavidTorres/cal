@@ -1,48 +1,40 @@
-"use client";
-
-import { useState, useMemo, ChangeEvent, useCallback } from "react";
+import { useEffect, useState, useMemo, ChangeEvent, useCallback } from "react";
 import items from "../database/db.js";
 
 export default function Search() {
-  // Estado para el valor de búsqueda
   const [query, setQuery] = useState<string>("");
   const [filteredItems, setFilteredItems] = useState<{ name: string }[]>(items);
 
-  // Función que maneja el cambio en el campo de búsqueda con debounce
-  const handleSearch = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const searchQuery = e.target.value;
-      setQuery(searchQuery);
-    },
-    []
-  );
+  const handleSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  }, []);
 
   // Debounce con un setTimeout
   const debouncedSearch = useMemo(() => {
-    const timeoutId = setTimeout(() => {
+    return () => {
       if (query.trim() === "") {
-        setFilteredItems(items); // Si no hay consulta, mostrar todos los elementos
+        setFilteredItems(items);
         return;
       }
 
-      // Convertimos la búsqueda a un array de palabras
       const searchWords = query
         .toLowerCase()
         .split(" ")
         .filter((word) => word.trim() !== "");
 
-      // Filtramos los productos si alguna palabra está presente en el nombre
-      const filtered = items.filter((item: any) => {
-        return searchWords.every((word) =>
-          item.name.toLowerCase().includes(word)
-        );
-      });
+      const filtered = items.filter((item: any) =>
+        searchWords.every((word) => item.name.toLowerCase().includes(word))
+      );
 
       setFilteredItems(filtered);
-    }, 500); // Retraso de 500ms (ajustable)
-
-    return () => clearTimeout(timeoutId); // Limpiar el timeout en caso de un nuevo cambio
+    };
   }, [query]);
+
+  // Ejecutar `debouncedSearch` después de un delay
+  useEffect(() => {
+    const timeoutId = setTimeout(() => debouncedSearch(), 500);
+    return () => clearTimeout(timeoutId);
+  }, [debouncedSearch]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -55,9 +47,7 @@ export default function Search() {
       />
       <ul>
         {filteredItems.length > 0 ? (
-          filteredItems.map((item, index) => (
-            <li key={index}>{item.name}</li>
-          ))
+          filteredItems.map((item, index) => <li key={index}>{item.name}</li>)
         ) : (
           <li>No se encontraron resultados</li>
         )}
