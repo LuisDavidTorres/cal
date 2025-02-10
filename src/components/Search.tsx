@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, ChangeEvent, useCallback } from "react";
 interface Item {
   name: string;
 }
 
+import { useState, useMemo, ChangeEvent, useCallback } from "react";
 import items from "../database/db";
 
 export default function Search() {
