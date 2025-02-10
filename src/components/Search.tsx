@@ -18,7 +18,7 @@ export default function Search() {
   );
 
   // Debounce con un setTimeout
-  const debouncedSearch = useMemo(() => {
+  useMemo(() => {
     const timeoutId = setTimeout(() => {
       if (query.trim() === "") {
         setFilteredItems(items); // Si no hay consulta, mostrar todos los elementos
@@ -50,7 +50,7 @@ export default function Search() {
         type="text"
         value={query}
         onChange={handleSearch}
-        placeholder="Buscar por nombre (puedes separar palabras)"
+        placeholder="Buscar por nombre"
         style={{ padding: "10px", marginBottom: "20px", width: "100%" }}
       />
       <ul>
