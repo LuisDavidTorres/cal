@@ -1,40 +1,51 @@
-import { useEffect, useState, useMemo, ChangeEvent, useCallback } from "react";
+"use client";
+
+import { useState, useMemo, ChangeEvent, useCallback } from "react";
 import items from "../database/db.js";
 
-export default function Search() {
-  const [query, setQuery] = useState<string>("");
-  const [filteredItems, setFilteredItems] = useState<{ name: string }[]>(items);
+// Definimos el tipo correcto para los elementos
+type Item = {
+  name: string;
+};
 
-  const handleSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-  }, []);
+export default function Search() {
+  // Estado para el valor de búsqueda
+  const [query, setQuery] = useState<string>("");
+  const [filteredItems, setFilteredItems] = useState<Item[]>(items);
+
+  // Función que maneja el cambio en el campo de búsqueda con debounce
+  const handleSearch = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const searchQuery = e.target.value;
+      setQuery(searchQuery);
+    },
+    []
+  );
 
   // Debounce con un setTimeout
-  const debouncedSearch = useMemo(() => {
-    return () => {
+  useMemo(() => {
+    const timeoutId = setTimeout(() => {
       if (query.trim() === "") {
-        setFilteredItems(items);
+        setFilteredItems(items); // Si no hay consulta, mostrar todos los elementos
         return;
       }
 
+      // Convertimos la búsqueda a un array de palabras
       const searchWords = query
         .toLowerCase()
         .split(" ")
         .filter((word) => word.trim() !== "");
 
-      const filtered = items.filter((item: any) =>
+      // Filtramos los productos si alguna palabra está presente en el nombre
+      const filtered = items.filter((item: Item) =>
         searchWords.every((word) => item.name.toLowerCase().includes(word))
       );
 
       setFilteredItems(filtered);
-    };
-  }, [query]);
+    }, 500); // Retraso de 500ms (ajustable)
 
-  // Ejecutar `debouncedSearch` después de un delay
-  useEffect(() => {
-    const timeoutId = setTimeout(() => debouncedSearch(), 500);
-    return () => clearTimeout(timeoutId);
-  }, [debouncedSearch]);
+    return () => clearTimeout(timeoutId); // Limpiar el timeout en caso de un nuevo cambio
+  }, [query]);
 
   return (
     <div style={{ padding: "20px" }}>
