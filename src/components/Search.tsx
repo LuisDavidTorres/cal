@@ -5,7 +5,8 @@ interface Item {
   name: string;
 }
 
-const items: Item[] = require("../database/db.js"); // Asegúrate de que la importación tenga el tipo correcto
+import items from "../database/db";
+
 export default function Search() {
   // Estado para el valor de búsqueda
   const [query, setQuery] = useState<string>("");
