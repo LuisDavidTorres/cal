@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useMemo, ChangeEvent, useCallback } from "react";
-import items from "../database/db.js";
+interface Item {
+  name: string;
+}
 
+const items: Item[] = require("../database/db.js"); // Asegúrate de que la importación tenga el tipo correcto
 export default function Search() {
   // Estado para el valor de búsqueda
   const [query, setQuery] = useState<string>("");
-  const [filteredItems, setFilteredItems] = useState<{ name: string }[]>(items);
+  const [filteredItems, setFilteredItems] = useState<Item[]>(items);
 
   // Función que maneja el cambio en el campo de búsqueda con debounce
   const handleSearch = useCallback(
@@ -32,7 +35,7 @@ export default function Search() {
         .filter((word) => word.trim() !== "");
 
       // Filtramos los productos si alguna palabra está presente en el nombre
-      const filtered = items.filter((item: any) => {
+      const filtered = items.filter((item: Item) => {
         return searchWords.every((word) =>
           item.name.toLowerCase().includes(word)
         );
