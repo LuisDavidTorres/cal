@@ -3,15 +3,10 @@
 import { useState, useMemo, ChangeEvent, useCallback } from "react";
 import items from "../database/db.js";
 
-// Definimos el tipo correcto para los elementos
-type Item = {
-  name: string;
-};
-
 export default function Search() {
   // Estado para el valor de búsqueda
   const [query, setQuery] = useState<string>("");
-  const [filteredItems, setFilteredItems] = useState<Item[]>(items);
+  const [filteredItems, setFilteredItems] = useState<{ name: string }[]>(items);
 
   // Función que maneja el cambio en el campo de búsqueda con debounce
   const handleSearch = useCallback(
@@ -23,7 +18,7 @@ export default function Search() {
   );
 
   // Debounce con un setTimeout
-  useMemo(() => {
+  const debouncedSearch = useMemo(() => {
     const timeoutId = setTimeout(() => {
       if (query.trim() === "") {
         setFilteredItems(items); // Si no hay consulta, mostrar todos los elementos
@@ -37,9 +32,11 @@ export default function Search() {
         .filter((word) => word.trim() !== "");
 
       // Filtramos los productos si alguna palabra está presente en el nombre
-      const filtered = items.filter((item: Item) =>
-        searchWords.every((word) => item.name.toLowerCase().includes(word))
-      );
+      const filtered = items.filter((item: any) => {
+        return searchWords.every((word) =>
+          item.name.toLowerCase().includes(word)
+        );
+      });
 
       setFilteredItems(filtered);
     }, 500); // Retraso de 500ms (ajustable)
@@ -58,7 +55,9 @@ export default function Search() {
       />
       <ul>
         {filteredItems.length > 0 ? (
-          filteredItems.map((item, index) => <li key={index}>{item.name}</li>)
+          filteredItems.map((item, index) => (
+            <li key={index}>{item.name}</li>
+          ))
         ) : (
           <li>No se encontraron resultados</li>
         )}
