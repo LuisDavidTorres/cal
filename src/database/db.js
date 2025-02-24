@@ -1,4 +1,4 @@
-export default items = [
+const items = [
     {name: 'SOPORTE MOTOR TRASERO CHEVROLET CORSA /02 C/C'},
     {name: 'FILTRO BENCINA MAZDA 626 98/02'},
     {name: 'CORREA DISTRIBUCION 116MR18 RENAULT TRAFIC'},
@@ -117508,4 +117508,6 @@ export default items = [
     {name: 'BUJIA NGK BP5HS (OFERTA)'},
     
   ];
+
+export default items
 
