@@ -45,7 +45,7 @@ export default function Search() {
       );
 
       // Ordenamos los resultados alfabéticamente para que los similares queden juntos
-      const sortedItems = filtered.sort((a : any, b : any) => a.name.localeCompare(b.name));
+      const sortedItems = filtered.sort((a, b) => a.name.localeCompare(b.name));
 
       setFilteredItems(sortedItems);
     }, 500); // Debounce delay of 500ms
