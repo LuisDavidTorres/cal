@@ -1,18 +1,22 @@
 "use client";
 
+import { useState, useMemo, ChangeEvent, useCallback, useRef } from "react";
+import { List } from "react-virtualized"; // Import the List component from react-virtualized
+import items from "../database/db"; // Your data
+
 interface Item {
   name: string;
 }
 
-import { useState, useMemo, ChangeEvent, useCallback } from "react";
-import items from "../database/db";
-
 export default function Search() {
-  // Estado para el valor de búsqueda
+  // State for search query and filtered items
   const [query, setQuery] = useState<string>("");
   const [filteredItems, setFilteredItems] = useState<Item[]>(items);
 
-  // Función que maneja el cambio en el campo de búsqueda con debounce
+  // Debounce timeout reference
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle search input with debounce
   const handleSearch = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const searchQuery = e.target.value;
@@ -21,51 +25,58 @@ export default function Search() {
     []
   );
 
-  // Debounce con un setTimeout
+  // Filtering logic with debounce and sorting
   useMemo(() => {
-    const timeoutId = setTimeout(() => {
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+
+    debounceTimeout.current = setTimeout(() => {
       if (query.trim() === "") {
-        setFilteredItems(items); // Si no hay consulta, mostrar todos los elementos
+        setFilteredItems(items); // If no query, show all items
         return;
       }
 
-      // Convertimos la búsqueda a un array de palabras
       const searchWords = query
         .toLowerCase()
         .split(" ")
         .filter((word) => word.trim() !== "");
 
-      // Filtramos los productos si alguna palabra está presente en el nombre
-      const filtered = items.filter((item: Item) => {
-        return searchWords.every((word) =>
-          item.name.toLowerCase().includes(word)
-        );
-      });
+      const filtered = items.filter((item: Item) =>
+        searchWords.every((word) => item.name.toLowerCase().includes(word))
+      );
 
-      setFilteredItems(filtered);
-    }, 500); // Retraso de 500ms (ajustable)
+      // Ordenamos los resultados alfabéticamente para que los similares queden juntos
+      const sortedItems = filtered.sort((a : any, b : any) => a.name.localeCompare(b.name));
 
-    return () => clearTimeout(timeoutId); // Limpiar el timeout en caso de un nuevo cambio
+      setFilteredItems(sortedItems);
+    }, 500); // Debounce delay of 500ms
   }, [query]);
+
+  // The render function for each item in the list
+  const renderRow = ({ index, key, style }: { index: number; key: string; style: React.CSSProperties }) => (
+    <div key={key} style={style} className="p-2 border-b border-gray-300">
+      {filteredItems[index].name}
+    </div>
+  );
 
   return (
     <div className="p-20">
       <input
+        className="border border-gray-300 rounded-md p-2 w-full mb-4"
         type="text"
         value={query}
         onChange={handleSearch}
         placeholder="Buscar por nombre"
-        style={{ padding: "10px", marginBottom: "20px", width: "100%" }}
       />
-      <ul>
-        {filteredItems.length > 0 ? (
-          filteredItems.map((item, index) => (
-            <li key={index}>{item.name}</li>
-          ))
-        ) : (
-          <li>No se encontraron resultados</li>
-        )}
-      </ul>
+      <div style={{ height: 400, width: "100%" }}>
+        {/* Use the List component from react-virtualized */}
+        <List
+          height={550} // The height of the visible list area
+          rowCount={filteredItems.length} // Total number of items to render
+          rowHeight={50} // The height of each row
+          width={1350} // The width of the list container
+          rowRenderer={renderRow} // Use the renderRow function to render each item
+        />
+      </div>
     </div>
   );
 }
