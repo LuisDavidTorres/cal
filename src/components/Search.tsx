@@ -49,7 +49,7 @@ export default function Search() {
   }, [query]);
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="p-20">
       <input
         type="text"
         value={query}
